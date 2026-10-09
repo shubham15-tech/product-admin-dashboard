@@ -3,8 +3,18 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "@/services/productService";
 import { Product } from "@/types/product";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const pageParam = searchParams.get("page");
+  const pageFromUrl = Number(pageParam) || 1;
+
+  const pageSizeParam = searchParams.get("pageSize");
+  const pageSizeFromUrl = Number(pageSizeParam) || 10;
+
   // Products currently displayed in the table
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -12,10 +22,14 @@ export default function Home() {
   const [total, setTotal] = useState(0);
 
   // Number of products shown on each page
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(pageSizeFromUrl);
 
   // Number of products to skip
-  const [skip, setSkip] = useState(0);
+  const [skip, setSkip] = useState((pageFromUrl - 1) * limit);
+
+  useEffect(() => {
+    setSkip((pageFromUrl - 1) * limit);
+  }, [pageFromUrl, limit]);
 
   // Fetch products whenever skip or limit changes
   useEffect(() => {
@@ -63,8 +77,11 @@ export default function Home() {
           id="pageSize"
           value={limit}
           onChange={(event) => {
-            setLimit(Number(event.target.value));
-            setSkip(0);
+            const newLimit = Number(event.target.value);
+
+            setLimit(newLimit);
+
+            router.push(`?page=1&pageSize=${newLimit}`);
           }}
           className="rounded border px-3 py-2"
         >
@@ -145,7 +162,9 @@ export default function Home() {
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {/* Previous button */}
         <button
-          onClick={() => setSkip(skip - limit)}
+          onClick={() => {
+            router.push(`?page=${currentPage - 1}&pageSize=${limit}`);
+          }}
           disabled={skip === 0}
           className="rounded bg-gray-500 px-4 py-2 text-white disabled:opacity-50"
         >
@@ -156,10 +175,12 @@ export default function Home() {
         {pageNumbers.map((page) => (
           <button
             key={page}
-            onClick={() => setSkip((page - 1) * limit)}
+            onClick={() => {
+              router.push(`?page=${page}&pageSize=${limit}`);
+            }}
             className={`rounded border px-3 py-2 ${currentPage === page
-                ? "bg-blue-500 text-white"
-                : ""
+              ? "bg-blue-500 text-white"
+              : ""
               }`}
           >
             {page}
@@ -168,7 +189,9 @@ export default function Home() {
 
         {/* Next button */}
         <button
-          onClick={() => setSkip(skip + limit)}
+          onClick={() => {
+            router.push(`?page=${currentPage + 1}&pageSize=${limit}`);
+          }}
           disabled={skip + limit >= total}
           className="rounded bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
         >
