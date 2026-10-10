@@ -61,6 +61,10 @@ export default function Home() {
         Product Admin Dashboard
       </h1>
 
+      <p className="mb-4 text-gray-600">
+        Manage products with pagination and page-size controls.
+      </p>
+
       {/* Showing products information */}
       <p className="mb-4">
         Showing {total === 0 ? 0 : skip + 1}–
