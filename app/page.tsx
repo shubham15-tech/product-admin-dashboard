@@ -71,6 +71,10 @@ export default function Home() {
         {Math.min(skip + limit, total)} of {total}
       </p>
 
+      <p className="mb-4 text-gray-600">
+        Total Products: {total}
+      </p>
+
       {/* Page size selector */}
       <div className="mb-4">
         <label htmlFor="pageSize" className="mr-2">
